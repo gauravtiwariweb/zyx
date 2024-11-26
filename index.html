@@ -66,7 +66,6 @@
       <button onclick="pauseAll()">Pause All</button>
       <button onclick="muteAll()">Mute All</button>
       <button onclick="unmuteAll()">Unmute All</button>
-      <button onclick="loopAll()">Loop All</button>
       <button onclick="restartAll()">Restart All</button>
     </div>
     <div>
@@ -99,8 +98,10 @@
     const firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-    // This function initializes YouTube players
-    function onYouTubeIframeAPIReady() {}
+    // YouTube API Ready Function
+    function onYouTubeIframeAPIReady() {
+      console.log('YouTube API is ready.');
+    }
 
     function setVideos() {
       const url = document.getElementById('youtubeLink').value;
@@ -141,12 +142,6 @@
 
     function unmuteAll() {
       players.forEach(player => player.unMute());
-    }
-
-    function loopAll() {
-      players.forEach(player => {
-        player.setLoop(true);
-      });
     }
 
     function restartAll() {
