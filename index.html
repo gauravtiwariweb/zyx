@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Multi-Screen Controller</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+    header {
+      background-color: #333;
+      color: #fff;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header button, header input {
+      margin: 0 5px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    header button {
+      background-color: #007BFF;
+      color: white;
+    }
+    header input {
+      width: 300px;
+      padding: 10px;
+    }
+    header button:hover {
+      background-color: #0056b3;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 20px;
+    }
+    .screen {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%;
+      background: #000;
+    }
+    .screen iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <button onclick="playAll()">Play All</button>
+      <button onclick="pauseAll()">Pause All</button>
+      <button onclick="muteAll()">Mute All</button>
+      <button onclick="loopAll()">Loop All</button>
+      <button onclick="restartAll()">Restart All</button>
+    </div>
+    <div>
+      <input id="youtubeLink" type="text" placeholder="Enter YouTube Link">
+      <button onclick="setVideos()">Set Videos</button>
+    </div>
+  </header>
+  <div class="container" id="videoContainer">
+    <!-- 12 Video Screens -->
+    <div class="screen" id="screen1"></div>
+    <div class="screen" id="screen2"></div>
+    <div class="screen" id="screen3"></div>
+    <div class="screen" id="screen4"></div>
+    <div class="screen" id="screen5"></div>
+    <div class="screen" id="screen6"></div>
+    <div class="screen" id="screen7"></div>
+    <div class="screen" id="screen8"></div>
+    <div class="screen" id="screen9"></div>
+    <div class="screen" id="screen10"></div>
+    <div class="screen" id="screen11"></div>
+    <div class="screen" id="screen12"></div>
+  </div>
+  
+  <script>
+    let players = []; // Array to store video players
+
+    function setVideos() {
+      const url = document.getElementById('youtubeLink').value;
+      if (!url) return alert('Please enter a valid YouTube URL.');
+      const videoId = url.split('v=')[1]?.split('&')[0];
+      if (!videoId) return alert('Invalid YouTube URL.');
+      
+      const container = document.getElementById('videoContainer');
+      players = []; // Reset players array
+      
+      // Loop through each screen and embed video
+      Array.from(container.children).forEach((screen, index) => {
+        screen.innerHTML = `<iframe id="player${index}" src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&controls=0" allow="autoplay; encrypted-media"></iframe>`;
+        players.push(screen.querySelector('iframe').contentWindow);
+      });
+    }
+
+    function postMessageToAll(action, value = null) {
+      players.forEach(player => {
+        if (player) player.postMessage({ event: 'command', func: action, args: value }, '*');
+      });
+    }
+
+    function playAll() {
+      postMessageToAll('playVideo');
+    }
+
+    function pauseAll() {
+      postMessageToAll('pauseVideo');
+    }
+
+    function muteAll() {
+      postMessageToAll('mute');
+    }
+
+    function loopAll() {
+      postMessageToAll('loop');
+    }
+
+    function restartAll() {
+      postMessageToAll('seekTo', [0, true]);
+      playAll();
+    }
+  </script>
+</body>
+</html>
