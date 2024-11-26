@@ -65,6 +65,7 @@
       <button onclick="playAll()">Play All</button>
       <button onclick="pauseAll()">Pause All</button>
       <button onclick="muteAll()">Mute All</button>
+      <button onclick="unmuteAll()">Unmute All</button>
       <button onclick="loopAll()">Loop All</button>
       <button onclick="restartAll()">Restart All</button>
     </div>
@@ -90,7 +91,16 @@
   </div>
   
   <script>
-    let players = []; // Array to store video players
+    let players = []; // Array to store YouTube player instances
+
+    // Load the YouTube IFrame API asynchronously
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    // This function initializes YouTube players
+    function onYouTubeIframeAPIReady() {}
 
     function setVideos() {
       const url = document.getElementById('youtubeLink').value;
@@ -103,36 +113,47 @@
       
       // Loop through each screen and embed video
       Array.from(container.children).forEach((screen, index) => {
-        screen.innerHTML = `<iframe id="player${index}" src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&controls=0" allow="autoplay; encrypted-media"></iframe>`;
-        players.push(screen.querySelector('iframe').contentWindow);
+        screen.innerHTML = `<div id="player${index}"></div>`;
+        const player = new YT.Player(`player${index}`, {
+          videoId: videoId,
+          playerVars: {
+            autoplay: 0,
+            controls: 0,
+            modestbranding: 1,
+          }
+        });
+        players.push(player);
       });
     }
 
-    function postMessageToAll(action, value = null) {
-      players.forEach(player => {
-        if (player) player.postMessage({ event: 'command', func: action, args: value }, '*');
-      });
-    }
-
+    // Global button controls
     function playAll() {
-      postMessageToAll('playVideo');
+      players.forEach(player => player.playVideo());
     }
 
     function pauseAll() {
-      postMessageToAll('pauseVideo');
+      players.forEach(player => player.pauseVideo());
     }
 
     function muteAll() {
-      postMessageToAll('mute');
+      players.forEach(player => player.mute());
+    }
+
+    function unmuteAll() {
+      players.forEach(player => player.unMute());
     }
 
     function loopAll() {
-      postMessageToAll('loop');
+      players.forEach(player => {
+        player.setLoop(true);
+      });
     }
 
     function restartAll() {
-      postMessageToAll('seekTo', [0, true]);
-      playAll();
+      players.forEach(player => {
+        player.seekTo(0);
+        player.playVideo();
+      });
     }
   </script>
 </body>
